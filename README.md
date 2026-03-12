@@ -22,7 +22,7 @@ The package:
 
 - Automatically resolves the correct download URL for all survey
   editions (2005 – present), including the post-COVID **ENOE-N** redesign
-- Loads any combination of the five questionnaire modules in a single
+- Loads any combination of the five questionnaire modules (.csv format) in a single
   ZIP download
 - Supports multi-period batch downloads with retry logic
 - Provides helpers to assemble long-format `data.table` panels across
@@ -81,7 +81,7 @@ q1_2024$coe1t   # occupation module 1
 q1_2024 <- enoe_load(2024, 1, tables = c("sdem", "coe1t"))
 ```
 
-### Multiple quarters
+### Multiple quarters (In Progress)
 
 ```r
 # All quarters 2022–2024
@@ -94,7 +94,7 @@ enoe_meta(panel)
 sdem_2023q1 <- panel$enoe_2023_t1$sdem
 ```
 
-### Panel assembly
+### Panel assembly (In Progress)
 
 ```r
 library(data.table)
@@ -106,28 +106,6 @@ sdem_list <- enoe_extract(panel, "sdem")
 sdem_all <- enoe_stack(panel, "sdem")
 sdem_all[, .N, by = period]
 ```
-
-### Wage-gap analysis workflow
-
-```r
-# 1. Download two years of SDEM
-panel <- enoe_list(2023, 2024, tables = c("sdem", "coe1t"))
-sdem  <- enoe_stack(panel, "sdem")
-
-# 2. Prime-age full-time workers
-sdem_pw <- sdem[
-  eda      %between% c(25L, 54L) &
-  emp_ppal == 1L                 &
-  hrsocup  %between% c(35L, 48L)
-]
-
-# 3. Log hourly wage
-sdem_pw[, log_wage := log(ing_x_hrs)]
-
-# 4. Raw gender gap
-sdem_pw[, .(mean_log_wage = mean(log_wage, na.rm = TRUE)), by = .(sex, period)]
-```
-
 ---
 
 ## Function reference
@@ -145,12 +123,9 @@ sdem_pw[, .(mean_log_wage = mean(log_wage, na.rm = TRUE)), by = .(sex, period)]
 ## Development roadmap
 
 - [x] `enoe_load()` — single quarter, all tables
-- [x] `enoe_list()` — multi-period batch with retries
-- [x] `enoe_stack()` / `enoe_extract()` — panel assembly helpers
+- [ ] `enoe_list()` — multi-period batch with retries
+- [ ] `enoe_stack()` / `enoe_extract()` — panel assembly helpers
 - [ ] `enoe_codebook()` — variable labels from INEGI dictionaries
-- [ ] Heckman selection correction helper for wage-gap analysis
-- [ ] Oaxaca-Blinder and Słoczyński decomposition wrappers
-- [ ] Chernozhukov–Fernández-Val–Melly unconditional quantile decomposition
 
 ---
 
@@ -158,7 +133,7 @@ sdem_pw[, .(mean_log_wage = mean(log_wage, na.rm = TRUE)), by = .(sex, period)]
 
 ```
 @software{enoeR2025,
-  author  = {Your Name},
+  author  = {DiegoSReco},
   title   = {{enoeR}: Download and Process Mexico's ENOE Labour Force Survey Microdata},
   year    = {2025},
   url     = {https://github.com/your-username/enoeR}
