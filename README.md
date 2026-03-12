@@ -144,6 +144,6 @@ sdem_all[, .N, by = period]
 
 ## Data source
 
-INEGI (2024). *Encuesta Nacional de Ocupación y Empleo (ENOE), población
+INEGI. *Encuesta Nacional de Ocupación y Empleo (ENOE), población
 de 15 años y más de edad*. Instituto Nacional de Estadística y Geografía.
 <https://www.inegi.org.mx/programas/enoe/15ymas/>
