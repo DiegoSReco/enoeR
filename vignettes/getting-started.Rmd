@@ -41,7 +41,7 @@ q1_2024 <- enoe_load(2024, 1, tables = c("sdem", "coe1t"))
 
 ---
 
-## 2. Batch download: multiple quarters
+## 2. Batch download: multiple quarters (In Progress)
 
 ```{r batch}
 # All quarters 2022–2024
@@ -60,7 +60,7 @@ enoe_meta(panel)
 
 ---
 
-## 3. Access a specific quarter
+## 3. Access a specific quarter (In Progress)
 
 ```{r access}
 # Panel element names follow the pattern "enoe_{year}_t{quarter}"
@@ -69,7 +69,7 @@ sdem_2023q1 <- panel$enoe_2023_t1$sdem
 
 ---
 
-## 4. Extract one table from all quarters
+## 4. Extract one table from all quarters  (In Progress)
 
 ```{r extract}
 sdem_list <- enoe_extract(panel, "sdem")
@@ -79,7 +79,7 @@ names(sdem_list)
 
 ---
 
-## 5. Stack all quarters into a single data.table
+## 5. Stack all quarters into a single data.table  (In Progress)
 
 ```{r stack}
 library(data.table)
