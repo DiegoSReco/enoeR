@@ -3,11 +3,11 @@ Title: Download and Process Mexico's ENOE Labour Force Survey Microdata
 Version: 0.1.0
 Authors@R: 
     person(
-      given   = "Your",
-      family  = "Name",
+      given   = "Diego",
+      family  = "Sanchez Rojas",
       role    = c("aut", "cre"),
-      email   = "your@email.com",
-      comment = c(ORCID = "0000-0000-0000-0000")
+      email   = "diegorodolfo.sanchez@egresados.cide.edu",
+      comment = c(ORCID = "0009-0008-7468-742X")
     )
 Description: Provides a programmatic interface to download, load, and manage
     microdata from Mexico's National Survey of Occupation and Employment
