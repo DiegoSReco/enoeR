@@ -92,38 +92,6 @@ sdem_all[, .N, by = period]
 # Add derived variables across the whole panel
 sdem_all[, log_wage := log(ingocup + 1)]
 ```
-
----
-
-## 6. Typical wage-gap analysis workflow
-
-```{r workflow}
-library(data.table)
-
-# 1. Download 2 years of SDEM + COE1T
-panel <- enoe_list(
-  start_year = 2023, end_year  = 2024,
-  tables     = c("sdem", "coe1t")
-)
-
-# 2. Stack SDEM across quarters
-sdem <- enoe_stack(panel, "sdem")
-
-# 3. Keep prime-age (25–54) full-time employed workers
-sdem_clean <- sdem[
-  eda  %between% c(25L, 54L) &   # age 25–54
-  emp_ppal == 1L             &   # employed
-  hrsocup %between% c(35L, 48L)  # full-time hours
-]
-
-# 4. Log hourly wage
-sdem_clean[, log_wage := log(ing_x_hrs)]
-
-# 5. Simple gender gap
-sdem_clean[, .(mean_log_wage = mean(log_wage, na.rm = TRUE)),
-           by = .(sex, period)]
-```
-
 ---
 
 ## Table reference
