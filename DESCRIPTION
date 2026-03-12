@@ -1,0 +1,40 @@
+Package: enoeR
+Title: Download and Process Mexico's ENOE Labour Force Survey Microdata
+Version: 0.1.0
+Authors@R: 
+    person(
+      given   = "Your",
+      family  = "Name",
+      role    = c("aut", "cre"),
+      email   = "your@email.com",
+      comment = c(ORCID = "0000-0000-0000-0000")
+    )
+Description: Provides a programmatic interface to download, load, and manage
+    microdata from Mexico's National Survey of Occupation and Employment
+    (Encuesta Nacional de Ocupación y Empleo, ENOE), published by INEGI.
+    The package supports all survey editions from 2005 onwards — including
+    ENOE-N (2020 Q3–2022 Q4) — and all five questionnaire modules:
+    SDEM (socio-demographic), COE1T (occupation module 1), COE2T (occupation
+    module 2), HOG (household), and VIV (dwelling).  Helper functions
+    facilitate multi-period panel assembly and table stacking for use in
+    labour-market research, wage-gap decomposition, and related analyses.
+License: MIT + file LICENSE
+URL: https://github.com/your-username/enoeR
+BugReports: https://github.com/your-username/enoeR/issues
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Language: en-US
+Depends: 
+    R (>= 4.1.0)
+Imports:
+    data.table (>= 1.14.0),
+    glue        (>= 1.6.0),
+    curl        (>= 5.0.0)
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    covr
+VignetteBuilder: knitr
+Config/testthat/edition: 3

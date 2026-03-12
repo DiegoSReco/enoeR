@@ -1,0 +1,148 @@
+---
+title: "Getting Started with enoeR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with enoeR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  eval     = FALSE   # examples require internet; set TRUE locally
+)
+library(enoeR)
+```
+
+## Overview
+
+`enoeR` provides a one-line interface to Mexico's **ENOE** (*Encuesta
+Nacional de Ocupación y Empleo*) microdata published by INEGI.  All
+editions from 2005 onwards are covered, including the **ENOE-N**
+post-COVID redesign (2020 Q3 – 2022 Q4).
+
+---
+
+## 1. Load a single quarter
+
+```{r single}
+# All five tables — Q1 2024
+q1_2024 <- enoe_load(2024, 1)
+
+# Inspect structure
+names(q1_2024)         # "sdem" "coe1t" "coe2t" "hog" "viv"
+nrow(q1_2024$sdem)
+
+# Only SDEM and COE1T (faster: same ZIP, fewer extractions)
+q1_2024 <- enoe_load(2024, 1, tables = c("sdem", "coe1t"))
+```
+
+---
+
+## 2. Batch download: multiple quarters
+
+```{r batch}
+# All quarters 2022–2024
+panel <- enoe_list(2022, 2024)
+
+# Single year, Q2–Q4 only
+panel_2023 <- enoe_list(2023, 2023, start_q = 2, end_q = 4)
+
+# Check metadata
+enoe_meta(panel)
+```
+
+> **Note:** 2020 Q2 is automatically excluded — INEGI suspended ENOE
+> that quarter due to COVID-19 and conducted the telephone ETOE survey
+> instead.
+
+---
+
+## 3. Access a specific quarter
+
+```{r access}
+# Panel element names follow the pattern "enoe_{year}_t{quarter}"
+sdem_2023q1 <- panel$enoe_2023_t1$sdem
+```
+
+---
+
+## 4. Extract one table from all quarters
+
+```{r extract}
+sdem_list <- enoe_extract(panel, "sdem")
+length(sdem_list)         # one element per successfully downloaded quarter
+names(sdem_list)
+```
+
+---
+
+## 5. Stack all quarters into a single data.table
+
+```{r stack}
+library(data.table)
+
+sdem_all <- enoe_stack(panel, "sdem")
+
+# Row counts per quarter
+sdem_all[, .N, by = period]
+
+# Add derived variables across the whole panel
+sdem_all[, log_wage := log(ingocup + 1)]
+```
+
+---
+
+## 6. Typical wage-gap analysis workflow
+
+```{r workflow}
+library(data.table)
+
+# 1. Download 2 years of SDEM + COE1T
+panel <- enoe_list(
+  start_year = 2023, end_year  = 2024,
+  tables     = c("sdem", "coe1t")
+)
+
+# 2. Stack SDEM across quarters
+sdem <- enoe_stack(panel, "sdem")
+
+# 3. Keep prime-age (25–54) full-time employed workers
+sdem_clean <- sdem[
+  eda  %between% c(25L, 54L) &   # age 25–54
+  emp_ppal == 1L             &   # employed
+  hrsocup %between% c(35L, 48L)  # full-time hours
+]
+
+# 4. Log hourly wage
+sdem_clean[, log_wage := log(ing_x_hrs)]
+
+# 5. Simple gender gap
+sdem_clean[, .(mean_log_wage = mean(log_wage, na.rm = TRUE)),
+           by = .(sex, period)]
+```
+
+---
+
+## Table reference
+
+| Code   | Module                                          | Key variables                        |
+|--------|-------------------------------------------------|--------------------------------------|
+| `sdem` | Socio-demographic characteristics               | Age, sex, education, wages, location |
+| `coe1t`| Occupation and Employment Questionnaire Part 1  | Employment status, hours worked      |
+| `coe2t`| Occupation and Employment Questionnaire Part 2  | Secondary job, earnings detail       |
+| `hog`  | Household questionnaire                         | Household composition, size          |
+| `viv`  | Dwelling questionnaire                          | Housing characteristics              |
+
+---
+
+## Survey editions and URL patterns
+
+| Period                   | Edition  |
+|--------------------------|----------|
+| 2005 Q1 – 2020 Q1        | ENOE     |
+| 2020 Q2                  | ETOE ⚠  |
+| 2020 Q3 – 2022 Q4        | ENOE-N   |
+| 2023 Q1 onwards          | ENOE     |

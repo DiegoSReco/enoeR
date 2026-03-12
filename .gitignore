@@ -1,0 +1,27 @@
+# R artifacts
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.Rcheck/
+*.Rproj
+
+# Package build
+/doc/
+/Meta/
+/inst/doc/
+*.tar.gz
+
+# Test artifacts
+/tests/testthat/_snaps/
+
+# Coverage
+/coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp / cache
+*.zip
+*.csv
