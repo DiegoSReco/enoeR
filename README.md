@@ -58,7 +58,7 @@ The package:
 ```r
 # Development version from GitHub
 # install.packages("remotes")
-remotes::install_github("your-username/enoeR")
+remotes::install_github("DiegoSReco/enoeR")
 ```
 
 ---
