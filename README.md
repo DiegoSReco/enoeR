@@ -85,13 +85,13 @@ q1_2024 <- enoe_load(2024, 1, tables = c("sdem", "coe1t"))
 
 ```r
 # All quarters 2022–2024
-panel <- enoe_list(2022, 2024)
+enoe_2022_2024 <- enoe_list(2022, 2024)
 
 # Print download metadata
-enoe_meta(panel)
+enoe_meta(enoe_2022_2024)
 
 # Access a specific quarter
-sdem_2023q1 <- panel$enoe_2023_t1$sdem
+sdem_2023q1 <- enoe_2022_2024$enoe_2023_t1$sdem
 ```
 
 ### Panel assembly (In Progress)
@@ -100,10 +100,10 @@ sdem_2023q1 <- panel$enoe_2023_t1$sdem
 library(data.table)
 
 # Extract SDEM from all quarters as a list
-sdem_list <- enoe_extract(panel, "sdem")
+sdem_list <- enoe_extract(enoe_2022_2024, "sdem")
 
 # Stack into a single long data.table
-sdem_all <- enoe_stack(panel, "sdem")
+sdem_all <- enoe_stack(enoe_2022_2024, "sdem")
 sdem_all[, .N, by = period]
 ```
 ---
