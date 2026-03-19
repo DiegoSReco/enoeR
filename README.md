@@ -85,13 +85,13 @@ q1_2024 <- enoe_load(2024, 1, tables = c("sdem", "coe1t"))
 
 ```r
 # All quarters 2022–2024
-enoe_2022_2024 <- enoe_list(2022, 2024)
+enoe_list_output <- enoe_list(2022, 2024)
 
 # Print download metadata
-enoe_meta(enoe_2022_2024)
+enoe_meta(enoe_list_output)
 
 # Access a specific quarter
-sdem_2023q1 <- enoe_2022_2024$enoe_2023_t1$sdem
+sdem_2023q1 <- enoe_list_output$enoe_2023_t1$sdem
 ```
 
 ### Extract and stacked (In Progress)
@@ -100,10 +100,10 @@ sdem_2023q1 <- enoe_2022_2024$enoe_2023_t1$sdem
 library(data.table)
 
 # Extract SDEM from all quarters as a list
-sdem_list <- enoe_extract(enoe_2022_2024, "sdem")
+sdem_list <- enoe_extract(enoe_list_output, "sdem")
 
 # Stack into a single long data.table
-sdem_all <- enoe_stack(enoe_2022_2024, "sdem")
+sdem_all <- enoe_stack(enoe_list_output, "sdem")
 sdem_all[, .N, by = period]
 ```
 ---
@@ -124,7 +124,8 @@ sdem_all[, .N, by = period]
 
 - [x] `enoe_load()` — single quarter, all tables
 - [ ] `enoe_list()` — multi-period batch with retries
-- [ ] `enoe_stack()` / `enoe_extract()` — panel assembly helpers
+- [ ] `enoe_meta()` — print meta data of the download
+- [ ] `enoe_stack()` / `enoe_extract()` — cross-sectional assembly helpers
 - [ ] `enoe_codebook()` — variable labels from INEGI dictionaries
 
 ---
