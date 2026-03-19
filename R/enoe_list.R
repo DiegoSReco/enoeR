@@ -74,7 +74,7 @@ enoe_list <- function(
           else                                          1L:4L
     data.frame(year = yr, quarter = qs, stringsAsFactors = FALSE)
   }))
-
+ 
   # Remove ETOE quarter
   etoe <- grid$year == 2020L & grid$quarter == 2L
   if (any(etoe)) {
@@ -106,14 +106,17 @@ enoe_list <- function(
       message(glue::glue("  [{i}/{total}] {yr} Q{qt} ..."))
 
     result <- NULL
+    elapsed <- NA_real_
     for (attempt in seq_len(retry_times + 1L)) {
       tryCatch({
+        t0 <- proc.time()["elapsed"]
         result <- enoe_load(
           año    = yr,
           n_trim = qt,
           tables = tables,
           quiet  = TRUE
         )
+        elapsed <- proc.time()["elapsed"] - t0 # if succeful stop timer
         break
       }, error = function(e) {
         if (attempt <= retry_times) {
@@ -135,13 +138,13 @@ enoe_list <- function(
       ok <- Filter(Negate(is.null), result)
       summary_str <- paste(
         sapply(names(ok), function(t)
-          glue::glue("{t}={format(nrow(ok[[t]]), big.mark = ',')}rows")),
+        glue::glue("{t}={format(nrow(ok[[t]]), big.mark = ',')}rows")),
         collapse = " | "
       )
-      message(glue::glue("    ✓  {summary_str}"))
+      message(glue::glue("    ✓  {summary_str} | time={round(elapsed, 1)}s"))
     }
 
-    list(key = key, data = result)
+    list(key = key, data = result, elapsed = elapsed)
   })
 
   # ── 3. Assemble output ───────────────────────────────────────

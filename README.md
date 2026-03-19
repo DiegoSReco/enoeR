@@ -60,9 +60,9 @@ The package:
 # install.packages("remotes")
 remotes::install_github("DiegoSReco/enoeR")
 ```
+If error use `force = TRUE` to force installation.
 
 ---
-
 ## Quick start
 
 ### Single quarter
@@ -71,24 +71,24 @@ remotes::install_github("DiegoSReco/enoeR")
 library(enoeR)
 
 # Load all five tables for Q1 2024
-q1_2024 <- enoe_load(2024, 1)
+q1_2024 <- enoeR::enoe_load(2024, 1)
 
 # Access tables
 q1_2024$sdem    # socio-demographic
 q1_2024$coe1t   # occupation module 1
 
 # Load only selected tables
-q1_2024 <- enoe_load(2024, 1, tables = c("sdem", "coe1t"))
+q1_2024 <- enoeR::enoe_load(2024, 1, tables = c("sdem", "coe1t"))
 ```
 
 ### Multiple quarters (In Progress)
 
 ```r
 # All quarters 2022–2024
-enoe_list_output <- enoe_list(2022, 2024)
+enoe_list_output <- enoeR::enoe_list(2022, 2024)
 
 # Print download metadata
-enoe_meta(enoe_list_output)
+enoeR::enoe_meta(enoe_list_output)
 
 # Access a specific quarter
 sdem_2023q1 <- enoe_list_output$enoe_2023_t1$sdem
@@ -100,10 +100,10 @@ sdem_2023q1 <- enoe_list_output$enoe_2023_t1$sdem
 library(data.table)
 
 # Extract SDEM from all quarters as a list
-sdem_list <- enoe_extract(enoe_list_output, "sdem")
+sdem_list <- enoeR::enoe_extract(enoe_list_output, "sdem")
 
 # Stack into a single long data.table
-sdem_all <- enoe_stack(enoe_list_output, "sdem")
+sdem_all <- enoeR::enoe_stack(enoe_list_output, "sdem")
 sdem_all[, .N, by = period]
 ```
 ---
