@@ -122,8 +122,8 @@ sdem_all[, .N, by = period]
 
 ## Development roadmap
 
-- [x] `enoe_load()` — single quarter, all tables
-- [x] `enoe_list()` — multi-period batch with retries
+- [x] `enoe_load()` — single quarter, all tables - March 11, 2026
+- [x] `enoe_list()` — multi-period batch with retries - March 19, 2026
 - [ ] `enoe_meta()` — print meta data of the download
 - [ ] `enoe_stack()` / `enoe_extract()` — cross-sectional assembly helpers
 - [ ] `enoe_codebook()` — variable labels from INEGI dictionaries

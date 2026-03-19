@@ -141,7 +141,7 @@ enoe_list <- function(
         glue::glue("{t}={format(nrow(ok[[t]]), big.mark = ',')}rows")),
         collapse = " | "
       )
-      message(glue::glue("    ✓  {summary_str} | time={round(elapsed, 1)}s"))
+      message(glue::glue("    ✓ {summary_str} | time={round(elapsed, 1)}s"))
     }
 
     list(key = key, data = result, elapsed = elapsed)
