@@ -94,7 +94,7 @@ enoe_meta(enoe_2022_2024)
 sdem_2023q1 <- enoe_2022_2024$enoe_2023_t1$sdem
 ```
 
-### Panel assembly (In Progress)
+### Extract and stacked (In Progress)
 
 ```r
 library(data.table)
@@ -114,9 +114,9 @@ sdem_all[, .N, by = period]
 |---|---|
 | `enoe_load(año, n_trim, tables, quiet)` | Download a single quarter |
 | `enoe_list(start_year, end_year, ...)` | Batch download across multiple quarters |
-| `enoe_extract(panel, table_name)` | Extract one table from all quarters |
-| `enoe_stack(panel, table_name)` | Stack table into one long `data.table` |
-| `enoe_meta(panel)` | Print download metadata |
+| `enoe_extract(enoe_list_output, table_name)` | Extract one table from all quarters |
+| `enoe_stack(enoe_list_output, table_name)` | Stack table into one long `data.table` |
+| `enoe_meta(enoe_list_output)` | Print download metadata |
 
 ---
 

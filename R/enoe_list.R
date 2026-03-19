@@ -31,13 +31,13 @@
 #' @examples
 #' \dontrun{
 #' # All quarters 2022–2024, all tables
-#' panel <- enoe_list(2022, 2024)
+#' enoe_list_output <- enoe_list(2022, 2024)
 #'
 #' # Only SDEM and COE1T
-#' panel <- enoe_list(2021, 2023, tables = c("sdem", "coe1t"))
+#' enoe_list_output <- enoe_list(2021, 2023, tables = c("sdem", "coe1t"))
 #'
 #' # Access one quarter
-#' sdem_2023q1 <- panel$enoe_2023_t1$sdem
+#' sdem_2023q1 <- enoe_list_output$enoe_2023_t1$sdem
 #' }
 #'
 #' @seealso [enoe_load()], [enoe_stack()], [enoe_extract()]
@@ -145,12 +145,12 @@ enoe_list <- function(
   })
 
   # ── 3. Assemble output ───────────────────────────────────────
-  panel <- stats::setNames(
+  enoe_list_output <- stats::setNames(
     lapply(raw, `[[`, "data"),
     sapply(raw, `[[`, "key")
   )
 
-  n_ok   <- sum(!vapply(panel, is.null, logical(1L)))
+  n_ok   <- sum(!vapply(enoe_list_output, is.null, logical(1L)))
   n_fail <- total - n_ok
 
   if (!quiet) {
@@ -160,8 +160,8 @@ enoe_list <- function(
       "\n└──────────────────────────────────────────────┘"
     ))
     avail_df <- data.frame(
-      Quarter = names(panel),
-      Status  = ifelse(vapply(panel, is.null, logical(1L)),
+      Quarter = names(enoe_list_output),
+      Status  = ifelse(vapply(enoe_list_output, is.null, logical(1L)),
                        "FAILED", "OK"),
       stringsAsFactors = FALSE
     )
@@ -169,7 +169,7 @@ enoe_list <- function(
   }
 
   # ── 4. Metadata attribute ────────────────────────────────────
-  attr(panel, "enoe_meta") <- list(
+  attr(enoe_list_output, "enoe_meta") <- list(
     start_year  = start_year,
     end_year    = end_year,
     start_q     = start_q,
@@ -178,9 +178,9 @@ enoe_list <- function(
     n_quarters  = total,
     n_ok        = n_ok,
     n_failed    = n_fail,
-    failed_keys = names(panel)[vapply(panel, is.null, logical(1L))],
+    failed_keys = names(enoe_list_output)[vapply(enoe_list_output, is.null, logical(1L))],
     timestamp   = Sys.time()
   )
 
-  panel
+  enoe_list_output
 }

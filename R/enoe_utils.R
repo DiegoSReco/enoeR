@@ -1,16 +1,16 @@
 # ============================================================
 #  enoe_utils.R
-#  Panel assembly helpers
+#  Cross-sectional assembly helpers
 # ============================================================
 
-#' Extract one table from all quarters in a panel list
+#' Extract one table from all quarters in a cross-sectional list
 #'
 #' @description
-#' Given a panel object returned by [enoe_list()], extracts the same
+#' Given a cross-sectional object returned by [enoe_list()], extracts the same
 #' table from every quarter and returns it as a named list.
 #' Quarters where the table is `NULL` are silently dropped.
 #'
-#' @param panel Named list as returned by [enoe_list()].
+#' @param enoe_list_output Named list as returned by [enoe_list()].
 #' @param table_name Character scalar. Name of the table to extract
 #'   (e.g. `"sdem"`, `"coe1t"`).
 #'
@@ -19,17 +19,17 @@
 #'
 #' @examples
 #' \dontrun{
-#' panel     <- enoe_list(2022, 2023)
-#' sdem_list <- enoe_extract(panel, "sdem")
+#' enoe_list_output     <- enoe_list(2022, 2023)
+#' sdem_list <- enoe_extract(enoe_list_output, "sdem")
 #' }
 #'
 #' @seealso [enoe_stack()]
 #' @export
-enoe_extract <- function(panel, table_name) {
+enoe_extract <- function(enoe_list_output, table_name) {
   if (!is.character(table_name) || length(table_name) != 1L)
     stop("'table_name' must be a single character string.")
 
-  out <- lapply(panel, function(q) {
+  out <- lapply(enoe_list_output, function(q) {
     if (is.null(q)) return(NULL)
     q[[table_name]]
   })
@@ -37,7 +37,7 @@ enoe_extract <- function(panel, table_name) {
 
   if (length(out) == 0L)
     warning(glue::glue(
-      "Table '{table_name}' was not found in any quarter of the panel."
+      "Table '{table_name}' was not found in any quarter of the enoe_list_output."
     ))
 
   out
@@ -53,7 +53,7 @@ enoe_extract <- function(panel, table_name) {
 #' across quarters (e.g. new variables introduced by INEGI) are filled
 #' with `NA` for quarters where they are absent (`fill = TRUE`).
 #'
-#' @param panel Named list as returned by [enoe_list()].
+#' @param enoe_list_output Named list as returned by [enoe_list()].
 #' @param table_name Character scalar. Name of the table to stack.
 #' @param add_period Logical. If `TRUE` (default), adds a `period` column.
 #'
@@ -62,16 +62,16 @@ enoe_extract <- function(panel, table_name) {
 #'
 #' @examples
 #' \dontrun{
-#' panel    <- enoe_list(2022, 2024)
-#' sdem_all <- enoe_stack(panel, "sdem")
+#' enoe_list_output    <- enoe_list(2022, 2024)
+#' sdem_all <- enoe_stack(enoe_list_output, "sdem")
 #' sdem_all[, .N, by = period]   # rows per quarter
 #' }
 #'
 #' @seealso [enoe_extract()]
 #' @importFrom data.table rbindlist
 #' @export
-enoe_stack <- function(panel, table_name, add_period = TRUE) {
-  tbls <- enoe_extract(panel, table_name)
+enoe_stack <- function(enoe_list_output, table_name, add_period = TRUE) {
+  tbls <- enoe_extract(enoe_list_output, table_name)
   if (length(tbls) == 0L) return(data.table::data.table())
 
   if (add_period) {
@@ -86,25 +86,25 @@ enoe_stack <- function(panel, table_name, add_period = TRUE) {
 }
 
 
-#' Print metadata from an enoe_list panel
+#' Print metadata from an enoe_list enoe_list_output
 #'
 #' @description
 #' Convenience function to display the `enoe_meta` attribute attached by
 #' [enoe_list()].
 #'
-#' @param panel Named list as returned by [enoe_list()].
+#' @param enoe_list_output Named list as returned by [enoe_list()].
 #'
 #' @return Invisibly returns the metadata list.
 #'
 #' @examples
 #' \dontrun{
-#' panel <- enoe_list(2023, 2024)
-#' enoe_meta(panel)
+#' enoe_list_output <- enoe_list(2023, 2024)
+#' enoe_meta(enoe_list_output)
 #' }
 #'
 #' @export
-enoe_meta <- function(panel) {
-  meta <- attr(panel, "enoe_meta")
+enoe_meta <- function(enoe_list_output) {
+  meta <- attr(enoe_list_output, "enoe_meta")
   if (is.null(meta)) {
     message("No 'enoe_meta' attribute found. Was this created by enoe_list()?")
     return(invisible(NULL))
