@@ -85,7 +85,7 @@ q1_2024$coe1t   # occupation module 1
 q1_2024 <- enoeR::enoe_load(2024, 1, tables = c("sdem", "coe1t"))
 ```
 
-### Multiple quarters (In Progress)
+### Multiple quarters
 
 ```r
 # All quarters 2022–2024
@@ -98,7 +98,7 @@ enoeR::enoe_meta(enoe_list_output)
 sdem_2023q1 <- enoe_list_output$enoe_2023_t1$sdem
 ```
 
-### Extract and stacked (In Progress)
+### Extract and stacked
 
 ```r
 library(data.table)
@@ -180,6 +180,97 @@ Trimestre Económico* 90(4)): ENOE 2016 Q1-2020 Q1, ages 15-65, northern border
 states. It gives 274,693 individuals and 882,866 observations against 274,613
 and 882,652 in the paper (within 0.03%).
 
+### Panel from tables you joined yourself
+
+`enoe_panel()` also takes a **named list of `enoe_join()` results**, so you can
+choose which tables enter the panel (for example SDEM + COE1T) and keep the
+join under your control. Names must end in `{year}_t{quarter}`.
+
+```r
+q <- list(
+  enoe_2024_t4 = enoe_join(enoe_load(2024, 4, c("sdem", "coe1t")), level = "person"),
+  enoe_2025_t1 = enoe_join(enoe_load(2025, 1, c("sdem", "coe1t")), level = "person"),
+  enoe_2025_t2 = enoe_join(enoe_load(2025, 2, c("sdem", "coe1t")), level = "person")
+)
+panel <- enoe_panel(q, level = "person")
+```
+
+With pre-joined tables, `filter_valid` has to be applied in `enoe_join()`.
+No separate function is needed: `enoe_panel()` detects the input type.
+
+### See the panel: schema, matches and attrition
+
+```r
+enoe_schema()                              # tables, keys and the panel unit (Mermaid)
+
+enoe_panel_flow(panel)$flow                # per quarter: followed, design exit, attrition
+enoe_panel_plot(panel, "cohorts")          # rotation triangle: units by entry quarter
+enoe_panel_plot(panel, "match")            # share of followable units matched next quarter
+enoe_panel_plot(panel, "outcome")          # followed / design exit (n_ent = 5) / attrition
+enoe_panel_diagram(panel)                  # Mermaid flow with the units followed between quarters
+```
+
+`match` and `outcome` plots print the counts on the chart. `enoe_panel_diagram()`
+draws one node per quarter and puts the number of units **followed** on the
+arrows; dotted arrows show units leaving by design and units lost. Quarters that
+are not consecutive (after 2020 Q2) are not linked. For many quarters, subset the
+panel first so the diagram stays readable.
+
+```mermaid
+flowchart LR
+  Q1["2019-Q1<br/>2 units<br/>(2 new)"]
+  Q2["2019-Q2<br/>2 units<br/>(1 new)"]
+  Q1 -->|"followed 1"| Q2
+  Q1 -.->|"attrition 1"| A1(["lost"])
+```
+
+`enoe_panel_flow()` separates units that leave **by design** (fifth interview,
+`n_ent == 5`) from real **attrition**. Plots need the suggested package
+`ggplot2`. The last quarter has no next quarter, so its outcome is `NA`, and
+`n_new` in the first quarter is left-censored.
+
+`enoe_schema()` returns a Mermaid diagram that GitHub renders:
+
+```mermaid
+erDiagram
+  VIV  ||--o{ HOG   : "ent, con, v_sel"
+  HOG  ||--o{ SDEM  : "+ n_hog, h_mud"
+  SDEM ||--o| COE1T : "+ n_ren"
+  SDEM ||--o| COE2T : "+ n_ren"
+  PANEL_UNIT ||--o{ SDEM : "observed each quarter"
+  PANEL_UNIT {
+    string panel_id PK "slot_id#spell"
+    string slot_id "ent-con-v_sel-n_hog-h_mud-n_ren"
+    int spell "new when n_ent breaks"
+    int n_obs
+  }
+```
+
+A COE record exists only for residents with `r_def = 00`, `c_res` 1 or 3 and
+`eda` 12-98. From 2020 Q3, `tipo` and `mes_cal` (and `ca` until 2021 Q2) are
+part of the keys.
+
+> **Why not `dplyneage`?** It draws column-level lineage for dplyr, dbplyr,
+> dtplyr, arrow and SQL pipelines, and needs Python (`sqlglot`) through
+> `reticulate`. It does not show matches or attrition of a panel, and enoeR is
+> plain `data.table`, so it is not a dependency. It could document column
+> lineage later if the pipeline moves to dtplyr or dbplyr.
+
+### Check against INEGI published figures
+
+```r
+est <- enoe_indicators(x)                      # PEA, ocupados, tasa de desocupacion...
+
+# Token in the INEGI_TOKEN environment variable; series ids from INEGI's BIE
+ref <- enoe_reference(c(pea = "<series id>", ocupados = "<series id>"))
+enoe_benchmark(est, ref, tol_rel = 0.005, tol_pp = 0.1)
+```
+
+`enoe_indicators()` uses INEGI's rules (`r_def = 00`, `c_res` 1 or 3, `eda`
+15-98, `clase1`, `clase2`) with `fac_tri` (or `fac` before 2020 Q3). Counts are
+compared in relative terms and rates in percentage points. The tolerances are
+conventions to set, not INEGI figures. Standard errors are not computed yet.
+
 ---
 
 ## Function reference
@@ -192,7 +283,14 @@ and 882,652 in the paper (within 0.03%).
 | `enoe_stack(enoe_list_output, table_name)` | Stack table into one long `data.table` |
 | `enoe_meta(enoe_list_output)` | Print download metadata |
 | `enoe_join(x, level, filter_valid, checks)` | Join the tables of a quarter at `"person"` or `"household"` level, with data-quality checks |
-| `enoe_panel(enoe_list_output, level, sample, phone_month, min_waves, ...)` | Long rotating panel at `"person"` or `"household"` level, with spells, rotation checks and quality flags |
+| `enoe_panel(enoe_list_output, level, sample, phone_month, min_waves, ...)` | Long rotating panel at `"person"` or `"household"` level, from `enoe_list()` output or from a named list of `enoe_join()` results |
+| `enoe_panel_flow(panel)` | Units followed, leaving by design and lost to attrition per quarter, plus cohort counts |
+| `enoe_panel_plot(panel, type)` | `ggplot2` plots: `"cohorts"`, `"match"`, `"outcome"` |
+| `enoe_panel_diagram(panel)` | Mermaid flowchart with the number of units followed between quarters, design exits and attrition |
+| `enoe_schema(include_panel)` | Mermaid diagram of the tables, keys and panel unit |
+| `enoe_indicators(enoe_list_output)` | PEA, ocupados, desocupados and rates from SDEM with INEGI's rules |
+| `enoe_benchmark(estimates, reference, tol_rel, tol_pp)` | Compare estimates with published figures |
+| `inegi_series(ids, token, source, area)` / `enoe_reference(series, scale)` | Download series from INEGI's indicators API (token in `INEGI_TOKEN`) |
 
 ### Examples by function
 
@@ -240,6 +338,8 @@ hh3 <- enoe_panel(x, level = "household", min_waves = 3)
 - [x] `enoe_stack()` / `enoe_extract()` — cross-sectional assembly helpers
 - [x] `enoe_join()` — join the tables of a quarter (person / household)
 - [x] `enoe_panel()` — rotating panel (person / household), validated against Alvarado et al. (2023)
+- [x] `enoe_panel_flow()` / `enoe_panel_plot()` / `enoe_schema()` — matches, attrition and schema
+- [x] `enoe_indicators()` / `enoe_benchmark()` — comparison with INEGI figures (first real comparison pending token and series ids)
 - [ ] `enoe_codebook()` — variable labels from INEGI dictionaries
 
 ---

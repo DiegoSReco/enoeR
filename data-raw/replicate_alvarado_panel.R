@@ -18,6 +18,7 @@
 # ============================================================
 
 pkgload::load_all(".", quiet = TRUE)
+
 library(data.table)
 
 # INEGI state codes of the six northern border states

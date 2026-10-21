@@ -30,9 +30,11 @@ Depends:
 Imports:
     data.table (>= 1.14.0),
     glue        (>= 1.6.0),
-    curl        (>= 5.0.0)
+    curl        (>= 5.0.0),
+    jsonlite
 Suggests:
     testthat (>= 3.0.0),
+    ggplot2,
     knitr,
     rmarkdown,
     covr

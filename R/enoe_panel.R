@@ -50,8 +50,12 @@
 #' prove that the same person was matched, so person-level flags are returned
 #' for review, not used to drop rows.
 #'
-#' @param enoe_list_output Output of [enoe_list()]. Elements must be named
-#'   `enoe_{year}_t{quarter}`.
+#' @param enoe_list_output Either the output of [enoe_list()] (tables are
+#'   joined internally with [enoe_join()]) or a **named list of [enoe_join()]
+#'   results**, one per quarter, to build the panel from tables you joined
+#'   yourself (for example SDEM + COE1T). Elements must be named
+#'   `enoe_{year}_t{quarter}`. Pre-joined tables need the id columns of the
+#'   chosen `level`; `filter_valid` must then be applied in [enoe_join()].
 #' @param level `"person"` (alias `"personal"`) or `"household"`.
 #' @param sample `"all"` (default), `"face_to_face"` (`tipo == 1`) or
 #'   `"phone"` (`tipo == 2`). Quarters without a `tipo` column (before
@@ -77,6 +81,14 @@
 #' x <- enoe_list(2022, 2023)
 #' p <- enoe_panel(x, level = "person")
 #' h <- enoe_panel(x, level = "household", min_waves = 2)
+#'
+#' # From tables joined by hand: SDEM + COE1T of three quarters
+#' q <- list(
+#'   enoe_2024_t4 = enoe_join(enoe_load(2024, 4, c("sdem", "coe1t")), "person"),
+#'   enoe_2025_t1 = enoe_join(enoe_load(2025, 1, c("sdem", "coe1t")), "person"),
+#'   enoe_2025_t2 = enoe_join(enoe_load(2025, 2, c("sdem", "coe1t")), "person")
+#' )
+#' p <- enoe_panel(q, level = "person")
 #' attr(p, "enoe_checks")$retention
 #' }
 #'
@@ -91,20 +103,30 @@ enoe_panel <- function(enoe_list_output, level = c("person", "household"),
   sample      <- match.arg(sample)
   phone_month <- match.arg(phone_month)
 
-  if (!is.list(enoe_list_output) ||
-      !any(vapply(enoe_list_output, .is_quarter, logical(1L))))
-    stop("'enoe_list_output' must be the output of enoe_list().")
-
-  quarters <- Filter(.is_quarter, enoe_list_output)
-  nms      <- names(quarters)
-  parsed   <- regmatches(nms, regexec("_(\\d{4})_t([1-4])$", nms))
-  if (any(lengths(parsed) == 0L))
+  src <- Filter(Negate(is.null), enoe_list_output)
+  is_joined <- is.list(src) && length(src) > 0L &&
+    all(vapply(src, is.data.frame, logical(1L)))
+  if (is_joined) {
+    quarters <- src
+    if (isTRUE(list(...)$filter_valid))
+      warning("'filter_valid' is ignored for pre-joined tables; apply it in enoe_join().",
+              call. = FALSE)
+  } else {
+    quarters <- Filter(.is_quarter, enoe_list_output)
+    if (length(quarters) == 0L)
+      stop("'enoe_list_output' must be the output of enoe_list() or a named ",
+           "list of enoe_join() results.")
+  }
+  if (is.null(names(quarters)))
     stop("Elements must be named 'enoe_{year}_t{quarter}'.")
+  nms <- names(quarters)
+  per <- .enoe_parse_period(nms)
 
   pieces <- lapply(seq_along(quarters), function(i) {
-    dt <- .enoe_join_quarter(quarters[[i]], level,
-                             filter_valid = isTRUE(list(...)$filter_valid),
-                             checks = FALSE)
+    dt <- if (is_joined) .enoe_lower(quarters[[i]])
+          else .enoe_join_quarter(quarters[[i]], level,
+                                  filter_valid = isTRUE(list(...)$filter_valid),
+                                  checks = FALSE)
     if (sample != "all") {
       want <- if (sample == "phone") 2L else 1L
       # no `tipo` column (before 2020 Q3) means face-to-face
@@ -112,7 +134,7 @@ enoe_panel <- function(enoe_list_output, level = c("person", "household"),
               else rep(sample == "face_to_face", nrow(dt))
       dt <- dt[keep]
     }
-    yr <- as.integer(parsed[[i]][2L]); qt <- as.integer(parsed[[i]][3L])
+    yr <- per$year[i]; qt <- per$quarter[i]
     data.table::set(dt, j = "period", value = nms[i])
     data.table::set(dt, j = "year", value = yr)
     data.table::set(dt, j = "quarter", value = qt)
