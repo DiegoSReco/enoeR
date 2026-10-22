@@ -219,7 +219,7 @@ returns the same flow as **Mermaid text**, which only renders in Markdown viewer
 (GitHub, Quarto, R Markdown with a mermaid chunk); printed in the R console it is
 just text. To see it from R, use `enoe_diagram_view()` (or `plot()`), which opens
 the diagram in the RStudio Viewer or your browser (needs internet: it loads
-Mermaid from a CDN). This works for `enoe_schema()` too. 
+Mermaid from a CDN). This works for `enoe_schema()` too.
 
 ```mermaid
 flowchart LR
@@ -255,7 +255,7 @@ A COE record exists only for residents with `r_def = 00`, `c_res` 1 or 3 and
 `eda` 12-98. From 2020 Q3, `tipo` and `mes_cal` (and `ca` until 2021 Q2) are
 part of the keys.
 
-### Check against INEGI published figures
+### Check against INEGI published figures (In Progress)
 
 ```r
 est <- enoe_indicators(x)                      # PEA, ocupados, tasa de desocupacion...
@@ -288,9 +288,9 @@ conventions to set, not INEGI figures. Standard errors are not computed yet.
 | `enoe_panel_diagram(panel)` | Mermaid flowchart with the number of units followed between quarters, design exits and attrition |
 | `enoe_diagram_view(x)` / `plot(x)` | Render the output of `enoe_panel_diagram()` or `enoe_schema()` in the RStudio Viewer or browser (Mermaid via CDN) |
 | `enoe_schema(include_panel)` | Mermaid diagram of the tables, keys and panel unit |
-| `enoe_indicators(enoe_list_output)` | PEA, ocupados, desocupados and rates from SDEM with INEGI's rules |
-| `enoe_benchmark(estimates, reference, tol_rel, tol_pp)` | Compare estimates with published figures |
-| `inegi_series(ids, token, source, area)` / `enoe_reference(series, scale)` | Download series from INEGI's indicators API (token in `INEGI_TOKEN`) |
+| `enoe_indicators(enoe_list_output)` *(in progress)* | PEA, ocupados, desocupados and rates from SDEM with INEGI's rules |
+| `enoe_benchmark(estimates, reference, tol_rel, tol_pp)` *(in progress)* | Compare estimates with published figures |
+| `inegi_series(ids, token, source, area)` / `enoe_reference(series, scale)` *(in progress)* | Download series from INEGI's indicators API (token in `INEGI_TOKEN`) |
 
 ### Examples by function
 
@@ -339,7 +339,7 @@ hh3 <- enoe_panel(x, level = "household", min_waves = 3)
 - [x] `enoe_join()` — join the tables of a quarter (person / household)
 - [x] `enoe_panel()` — rotating panel (person / household), validated against Alvarado et al. (2023)
 - [x] `enoe_panel_flow()` / `enoe_panel_plot()` / `enoe_schema()` — matches, attrition and schema
-- [x] `enoe_indicators()` / `enoe_benchmark()` — comparison with INEGI figures (first real comparison pending token and series ids)
+- [ ] `enoe_indicators()` / `enoe_benchmark()` — comparison with INEGI figures (in progress: first real comparison pending token and series ids)
 - [ ] `enoe_codebook()` — variable labels from INEGI dictionaries
 
 ---
