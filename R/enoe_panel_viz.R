@@ -354,3 +354,62 @@ print.enoe_schema <- function(x, ...) {
   cat("```mermaid\n", unclass(x), "\n```\n", sep = "")
   invisible(x)
 }
+
+
+#' View a Mermaid diagram in the browser or RStudio Viewer
+#'
+#' @description
+#' Renders the output of [enoe_panel_diagram()] or [enoe_schema()] by writing a
+#' small HTML page that loads Mermaid 10.9.1 from the jsDelivr CDN, so it needs
+#' an internet connection. `plot()` on these objects calls it too.
+#'
+#' DiagrammeR is not used: its bundled Mermaid (DiagrammeR 1.0.12) is too old
+#' for `flowchart` and `erDiagram` and shows the raw text.
+#'
+#' @param x Output of [enoe_panel_diagram()] or [enoe_schema()].
+#' @param file Path of the HTML file. Default: a temporary file.
+#' @param open Logical. Open it in the RStudio Viewer (if available) or the
+#'   default browser. Default `interactive()`.
+#' @param ... Unused (for `plot()`).
+#'
+#' @return The HTML file path, invisibly.
+#'
+#' @examples
+#' \dontrun{
+#' enoe_diagram_view(enoe_schema())
+#' enoe_diagram_view(enoe_panel_diagram(panel))
+#' plot(enoe_schema())
+#' }
+#'
+#' @seealso [enoe_panel_plot()] for a flowchart drawn in R without Mermaid.
+#' @export
+enoe_diagram_view <- function(x, file = tempfile(fileext = ".html"),
+                              open = interactive()) {
+  if (!inherits(x, "enoe_schema"))
+    stop("'x' must come from enoe_panel_diagram() or enoe_schema().")
+  esc <- function(s) {
+    s <- gsub("&", "&amp;", s, fixed = TRUE)
+    s <- gsub("<", "&lt;", s, fixed = TRUE)
+    gsub(">", "&gt;", s, fixed = TRUE)
+  }
+  html <- paste0(
+    '<!doctype html><html><head><meta charset="utf-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1">',
+    "<title>enoeR diagram</title></head><body>",
+    '<pre class="mermaid">', esc(unclass(x)), "</pre>",
+    '<script type="module">',
+    'import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs";',
+    "mermaid.initialize({ startOnLoad: true });",
+    "</script></body></html>"
+  )
+  writeLines(html, file, useBytes = TRUE)
+  if (open) {
+    viewer <- getOption("viewer")
+    if (is.function(viewer)) viewer(file) else utils::browseURL(file)
+  }
+  invisible(file)
+}
+
+#' @rdname enoe_diagram_view
+#' @export
+plot.enoe_schema <- function(x, ...) enoe_diagram_view(x, ...)

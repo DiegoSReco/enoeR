@@ -209,13 +209,18 @@ enoe_panel_plot(panel, "match")            # share of followable units matched n
 enoe_panel_plot(panel, "outcome")          # followed / design exit (n_ent = 5) / attrition
 enoe_panel_plot(panel, "flow")             # flowchart drawn in R: units followed between quarters
 enoe_panel_diagram(panel)                  # same flow as Mermaid text (for GitHub / Quarto)
+enoe_diagram_view(enoe_panel_diagram(panel))   # render the Mermaid in Viewer / browser
+plot(enoe_schema())                        # same for the schema
 ```
 
 `match` and `outcome` plots print the counts on the chart. `enoe_panel_plot(panel, "flow")`
 is the flowchart drawn inside R, so it shows in the RStudio Plots pane. `enoe_panel_diagram()`
 returns the same flow as **Mermaid text**, which only renders in Markdown viewers
 (GitHub, Quarto, R Markdown with a mermaid chunk); printed in the R console it is
-just text. It draws one node per quarter and puts the number of units **followed** on the
+just text. To see it from R, use `enoe_diagram_view()` (or `plot()`), which opens
+the diagram in the RStudio Viewer or your browser (needs internet: it loads
+Mermaid from a CDN). This works for `enoe_schema()` too. `DiagrammeR::mermaid()`
+does not work here: its bundled Mermaid is too old and shows the raw text. It draws one node per quarter and puts the number of units **followed** on the
 arrows; dotted arrows show units leaving by design and units lost. Quarters that
 are not consecutive (after 2020 Q2) are not linked. For many quarters, subset the
 panel first so the diagram stays readable.
@@ -291,6 +296,7 @@ conventions to set, not INEGI figures. Standard errors are not computed yet.
 | `enoe_panel_flow(panel)` | Units followed, leaving by design and lost to attrition per quarter, plus cohort counts |
 | `enoe_panel_plot(panel, type)` | `ggplot2` plots: `"cohorts"`, `"match"`, `"outcome"`, `"flow"` |
 | `enoe_panel_diagram(panel)` | Mermaid flowchart with the number of units followed between quarters, design exits and attrition |
+| `enoe_diagram_view(x)` / `plot(x)` | Render the output of `enoe_panel_diagram()` or `enoe_schema()` in the RStudio Viewer or browser (Mermaid via CDN) |
 | `enoe_schema(include_panel)` | Mermaid diagram of the tables, keys and panel unit |
 | `enoe_indicators(enoe_list_output)` | PEA, ocupados, desocupados and rates from SDEM with INEGI's rules |
 | `enoe_benchmark(estimates, reference, tol_rel, tol_pp)` | Compare estimates with published figures |

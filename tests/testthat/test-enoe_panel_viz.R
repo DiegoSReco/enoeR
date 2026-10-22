@@ -116,3 +116,18 @@ test_that("diagram does not link non-consecutive quarters", {
   d <- enoe_panel_diagram(enoe_panel(y, "person"))
   expect_false(grepl("-->", d, fixed = TRUE))
 })
+
+test_that("enoe_diagram_view writes an HTML page with the escaped diagram", {
+  d <- enoe_panel_diagram(enoe_panel(x, "person"))
+  f <- tempfile(fileext = ".html")
+  out <- enoe_diagram_view(d, file = f, open = FALSE)
+  expect_equal(out, f)
+  html <- paste(readLines(f, warn = FALSE), collapse = "\n")
+  expect_match(html, "flowchart LR", fixed = TRUE)
+  expect_false(grepl("<br/>", html, fixed = TRUE))            # escaped as text
+  expect_match(html, "&lt;br/&gt;", fixed = TRUE)
+  expect_match(html, "mermaid@10.9.1", fixed = TRUE)
+  expect_equal(plot(enoe_schema(), file = tempfile(fileext = ".html"), open = FALSE) |>
+                 file.exists(), TRUE)
+  expect_error(enoe_diagram_view("flowchart LR", open = FALSE), "enoe_panel_diagram")
+})
