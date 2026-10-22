@@ -219,11 +219,7 @@ returns the same flow as **Mermaid text**, which only renders in Markdown viewer
 (GitHub, Quarto, R Markdown with a mermaid chunk); printed in the R console it is
 just text. To see it from R, use `enoe_diagram_view()` (or `plot()`), which opens
 the diagram in the RStudio Viewer or your browser (needs internet: it loads
-Mermaid from a CDN). This works for `enoe_schema()` too. `DiagrammeR::mermaid()`
-does not work here: its bundled Mermaid is too old and shows the raw text. It draws one node per quarter and puts the number of units **followed** on the
-arrows; dotted arrows show units leaving by design and units lost. Quarters that
-are not consecutive (after 2020 Q2) are not linked. For many quarters, subset the
-panel first so the diagram stays readable.
+Mermaid from a CDN). This works for `enoe_schema()` too. 
 
 ```mermaid
 flowchart LR
@@ -258,12 +254,6 @@ erDiagram
 A COE record exists only for residents with `r_def = 00`, `c_res` 1 or 3 and
 `eda` 12-98. From 2020 Q3, `tipo` and `mes_cal` (and `ca` until 2021 Q2) are
 part of the keys.
-
-> **Why not `dplyneage`?** It draws column-level lineage for dplyr, dbplyr,
-> dtplyr, arrow and SQL pipelines, and needs Python (`sqlglot`) through
-> `reticulate`. It does not show matches or attrition of a panel, and enoeR is
-> plain `data.table`, so it is not a dependency. It could document column
-> lineage later if the pipeline moves to dtplyr or dbplyr.
 
 ### Check against INEGI published figures
 
