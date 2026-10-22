@@ -93,11 +93,14 @@ enoe_panel_flow <- function(panel) {
 #'   per quarter. Without losses it is 1.
 #' * `"outcome"`: units of each quarter split by what happens next quarter:
 #'   followed, design exit (fifth interview) or attrition.
+#' * `"flow"`: flowchart drawn in R (no Mermaid needed): one box per quarter,
+#'   arrows with the units followed, and boxes below with design exits and
+#'   attrition. Same content as [enoe_panel_diagram()].
 #'
 #' Requires the suggested package `ggplot2`.
 #'
 #' @param panel Output of [enoe_panel()].
-#' @param type `"cohorts"`, `"match"` or `"outcome"`.
+#' @param type `"cohorts"`, `"match"`, `"outcome"` or `"flow"`.
 #'
 #' @return A `ggplot` object.
 #'
@@ -110,7 +113,7 @@ enoe_panel_flow <- function(panel) {
 #'
 #' @seealso [enoe_panel_flow()], [enoe_schema()]
 #' @export
-enoe_panel_plot <- function(panel, type = c("cohorts", "match", "outcome")) {
+enoe_panel_plot <- function(panel, type = c("cohorts", "match", "outcome", "flow")) {
   type <- match.arg(type)
   if (!requireNamespace("ggplot2", quietly = TRUE))
     stop("Package 'ggplot2' is needed for plots: install.packages(\"ggplot2\").")
@@ -150,6 +153,51 @@ enoe_panel_plot <- function(panel, type = c("cohorts", "match", "outcome")) {
                       x = "Quarter", y = "Match rate") +
         ggplot2::theme_minimal() +
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+    )
+  }
+
+  if (type == "flow") {
+    fmt <- function(x) format(x, big.mark = ",", trim = TRUE)
+    f$x <- seq_len(nrow(f))
+    nodes <- data.frame(
+      x = f$x, y = 0,
+      label = sprintf("%s\n%s units\n(%s new)", f$period, fmt(f$n), fmt(f$n_new))
+    )
+    link <- which(diff(f$period_idx) == 1L)
+    arr <- data.frame(x = f$x[link] + 0.36, xend = f$x[link + 1L] - 0.36, y = 0,
+                      label = sprintf("followed\n%s", fmt(f$n_followed[link])))
+    de <- f[f$x %in% link & f$n_design_exit > 0L, ]
+    at <- f[f$x %in% link & f$n_attrition > 0L, ]
+    p <- gg() +
+      ggplot2::geom_segment(data = arr, aes(x = x, xend = xend, y = y, yend = y),
+                            colour = "#1f5f99", linewidth = 0.8,
+                            arrow = ggplot2::arrow(length = grid::unit(0.18, "cm"))) +
+      ggplot2::geom_text(data = arr, aes(x = (x + xend) / 2, y = y + 0.28, label = label),
+                         size = 2.6, colour = "#1f5f99", lineheight = 0.9) +
+      ggplot2::geom_label(data = nodes, aes(x = x, y = y, label = label),
+                          size = 2.8, fill = "#e8f1fa", lineheight = 0.95)
+    if (nrow(de) > 0L)
+      p <- p +
+        ggplot2::geom_segment(data = de, aes(x = x, xend = x, y = -0.2, yend = -0.4),
+                              linetype = "dotted", colour = "grey40") +
+        ggplot2::geom_label(data = de, aes(x = x, y = -0.6,
+                            label = paste0("design exit\n", fmt(n_design_exit))),
+                            size = 2.5, fill = "#eceff1", lineheight = 0.95)
+    if (nrow(at) > 0L)
+      p <- p +
+        ggplot2::geom_segment(data = at, aes(x = x, xend = x, y = -0.82, yend = -1.0),
+                              linetype = "dotted", colour = "#c0392b") +
+        ggplot2::geom_label(data = at, aes(x = x, y = -1.22,
+                            label = paste0("attrition\n", fmt(n_attrition))),
+                            size = 2.5, fill = "#fdecea", colour = "#c0392b",
+                            lineheight = 0.95)
+    return(
+      p + ggplot2::scale_x_continuous(expand = ggplot2::expansion(add = 0.7)) +
+        ggplot2::scale_y_continuous(expand = ggplot2::expansion(add = 0.4)) +
+        ggplot2::labs(title = "Units followed between quarters",
+                      subtitle = "Last quarter has no next quarter observed") +
+        ggplot2::theme_void() +
+        ggplot2::theme(plot.title = ggplot2::element_text(face = "bold"))
     )
   }
 

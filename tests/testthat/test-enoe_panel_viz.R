@@ -78,8 +78,11 @@ test_that("enoe_panel_flow rejects non-panel input", {
 test_that("plots return ggplot objects", {
   skip_if_not_installed("ggplot2")
   p <- enoe_panel(x, "person")
-  for (tp in c("cohorts", "match", "outcome"))
-    expect_s3_class(enoe_panel_plot(p, tp), "ggplot")
+  for (tp in c("cohorts", "match", "outcome", "flow")) {
+    g <- enoe_panel_plot(p, tp)
+    expect_s3_class(g, "ggplot")
+    expect_no_error(ggplot2::ggplot_build(g))
+  }
 })
 
 test_that("enoe_schema describes the tables, keys and panel unit", {

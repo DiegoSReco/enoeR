@@ -207,11 +207,15 @@ enoe_panel_flow(panel)$flow                # per quarter: followed, design exit,
 enoe_panel_plot(panel, "cohorts")          # rotation triangle: units by entry quarter
 enoe_panel_plot(panel, "match")            # share of followable units matched next quarter
 enoe_panel_plot(panel, "outcome")          # followed / design exit (n_ent = 5) / attrition
-enoe_panel_diagram(panel)                  # Mermaid flow with the units followed between quarters
+enoe_panel_plot(panel, "flow")             # flowchart drawn in R: units followed between quarters
+enoe_panel_diagram(panel)                  # same flow as Mermaid text (for GitHub / Quarto)
 ```
 
-`match` and `outcome` plots print the counts on the chart. `enoe_panel_diagram()`
-draws one node per quarter and puts the number of units **followed** on the
+`match` and `outcome` plots print the counts on the chart. `enoe_panel_plot(panel, "flow")`
+is the flowchart drawn inside R, so it shows in the RStudio Plots pane. `enoe_panel_diagram()`
+returns the same flow as **Mermaid text**, which only renders in Markdown viewers
+(GitHub, Quarto, R Markdown with a mermaid chunk); printed in the R console it is
+just text. It draws one node per quarter and puts the number of units **followed** on the
 arrows; dotted arrows show units leaving by design and units lost. Quarters that
 are not consecutive (after 2020 Q2) are not linked. For many quarters, subset the
 panel first so the diagram stays readable.
@@ -285,7 +289,7 @@ conventions to set, not INEGI figures. Standard errors are not computed yet.
 | `enoe_join(x, level, filter_valid, checks)` | Join the tables of a quarter at `"person"` or `"household"` level, with data-quality checks |
 | `enoe_panel(enoe_list_output, level, sample, phone_month, min_waves, ...)` | Long rotating panel at `"person"` or `"household"` level, from `enoe_list()` output or from a named list of `enoe_join()` results |
 | `enoe_panel_flow(panel)` | Units followed, leaving by design and lost to attrition per quarter, plus cohort counts |
-| `enoe_panel_plot(panel, type)` | `ggplot2` plots: `"cohorts"`, `"match"`, `"outcome"` |
+| `enoe_panel_plot(panel, type)` | `ggplot2` plots: `"cohorts"`, `"match"`, `"outcome"`, `"flow"` |
 | `enoe_panel_diagram(panel)` | Mermaid flowchart with the number of units followed between quarters, design exits and attrition |
 | `enoe_schema(include_panel)` | Mermaid diagram of the tables, keys and panel unit |
 | `enoe_indicators(enoe_list_output)` | PEA, ocupados, desocupados and rates from SDEM with INEGI's rules |
